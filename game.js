@@ -67,6 +67,8 @@ let bgmMaster = null;
 let sfxMaster = null;
 let bgmEnabled = true;
 let bgmLoopTimer = null;
+let nextBgmPhraseTime = 0;
+const BGM_PHRASE_DURATION = 2.4;
 
 function scheduleCircusNote(frequency, startTime, duration, timbre, volume) {
   const oscillator = audioContext.createOscillator();
@@ -84,10 +86,11 @@ function scheduleCircusNote(frequency, startTime, duration, timbre, volume) {
   overtone.detune.setValueAtTime(humanDetune - 2, startTime);
   vibrato.frequency.setValueAtTime(timbre === "bass" ? 3.2 : 4.7, startTime);
   vibratoDepth.gain.setValueAtTime(timbre === "bass" ? 0.22 : timbre === "bell" ? 0.32 : 0.75, startTime);
-  noteGain.gain.setValueAtTime(0.0001, startTime);
-  noteGain.gain.exponentialRampToValueAtTime(volume, startTime + 0.065);
-  noteGain.gain.setValueAtTime(volume * 0.86, startTime + duration * 0.62);
+  noteGain.gain.setValueAtTime(0, startTime);
+  noteGain.gain.linearRampToValueAtTime(volume, startTime + 0.065);
+  noteGain.gain.linearRampToValueAtTime(volume * 0.86, startTime + duration * 0.62);
   noteGain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  noteGain.gain.linearRampToValueAtTime(0, startTime + duration + 0.02);
   overtoneGain.gain.value = timbre === "bass" ? 0.08 : timbre === "bell" ? 0.32 : 0.2;
   vibrato.connect(vibratoDepth).connect(oscillator.frequency);
   vibratoDepth.connect(overtone.frequency);
@@ -99,12 +102,19 @@ function scheduleCircusNote(frequency, startTime, duration, timbre, volume) {
   oscillator.stop(startTime + duration + 0.03);
   overtone.stop(startTime + duration + 0.03);
   vibrato.stop(startTime + duration + 0.03);
+  oscillator.onended = () => {
+    oscillator.disconnect();
+    overtone.disconnect();
+    vibrato.disconnect();
+    vibratoDepth.disconnect();
+    overtoneGain.disconnect();
+    noteGain.disconnect();
+  };
 }
 
-function scheduleCircusPhrase() {
+function scheduleCircusPhrase(start) {
   if (!audioContext || !bgmMaster) return;
   const eighth = 0.2;
-  const start = audioContext.currentTime + 0.06;
   const melody = [
     293.66, 349.23, 440, 466.16, 440, 392,
     349.23, 329.63, 293.66, 277.18, 293.66, 220
@@ -136,6 +146,17 @@ function scheduleCircusPhrase() {
     });
     scheduleCircusNote(counterMelody[chordIndex], start + chordIndex * eighth * 3 + eighth, eighth * 1.8, "bell", 0.014);
   });
+}
+
+function scheduleBgmAhead() {
+  if (!audioContext || audioContext.state !== "running") return;
+  const now = audioContext.currentTime;
+  // Recover from a throttled timer without playing missed phrases together.
+  if (nextBgmPhraseTime < now + 0.03) nextBgmPhraseTime = now + 0.06;
+  while (nextBgmPhraseTime < now + 0.5) {
+    scheduleCircusPhrase(nextBgmPhraseTime);
+    nextBgmPhraseTime += BGM_PHRASE_DURATION;
+  }
 }
 
 function initBgm() {
@@ -180,8 +201,8 @@ function initBgm() {
   filter.connect(roomDelay);
   roomDelay.connect(roomFeedback).connect(roomDelay);
   roomDelay.connect(roomWet).connect(compressor);
-  scheduleCircusPhrase();
-  bgmLoopTimer = window.setInterval(scheduleCircusPhrase, 2400);
+  scheduleBgmAhead();
+  bgmLoopTimer = window.setInterval(scheduleBgmAhead, 100);
 }
 
 function scheduleSfxTone(frequency, start, duration, endFrequency = frequency, waveform = "square", peak = 0.12) {
