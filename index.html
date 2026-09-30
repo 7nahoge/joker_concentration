@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#241f20">
+  <title>ジョーカーの嘘つき神経衰弱</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <section class="start-screen" id="start-screen" aria-labelledby="start-title">
+    <div class="start-card">
+      <p class="start-eyebrow">THE JOKER'S MEMORY GAME</p>
+      <p class="start-mark" aria-hidden="true">♛</p>
+      <h2 id="start-title">ジョーカーの<br><span>嘘つき神経衰弱</span></h2>
+      <p class="start-description">嘘を見破り、同じ仮面を揃えよう。</p>
+      <button class="start-button" id="start-button" type="button">ゲームを始める</button>
+    </div>
+  </section>
+
+  <main class="stage">
+    <section class="joker-panel" aria-labelledby="game-title">
+      <div class="title-block">
+        <p class="eyebrow">A memory game in an old theatre</p>
+        <h1 id="game-title">ジョーカーの<br><span>嘘つき神経衰弱</span></h1>
+      </div>
+
+      <div class="character-wrap" aria-hidden="true">
+        <div class="spotlight"></div>
+        <img class="joker" src="assets/joker.png" alt="">
+      </div>
+
+      <div class="speech" aria-live="polite" aria-atomic="true">
+        <span class="speech-label">JOKER</span>
+        <p id="joker-line">さあ、幕を上げよう。カードの顔を覚えておいで。</p>
+      </div>
+    </section>
+
+    <section class="game-panel" aria-label="神経衰弱ゲーム">
+      <header class="game-header">
+        <div class="stats" aria-label="ゲーム状況">
+          <p><span>手数</span><strong id="move-count">0</strong></p>
+          <i aria-hidden="true"></i>
+          <p><span>揃った組</span><strong><b id="pair-count">0</b> / 8</strong></p>
+          <i aria-hidden="true"></i>
+          <p><span>見破り</span><strong id="insight-count">0</strong></p>
+        </div>
+        <div class="header-actions">
+          <button class="sound-button" id="sound-button" type="button" aria-pressed="true">BGM ON</button>
+          <button class="restart-button" id="restart-button" type="button">もう一度遊ぶ</button>
+        </div>
+      </header>
+
+      <div class="ornament" aria-hidden="true"><span>◆</span></div>
+      <div class="hint-answer" id="hint-answer" aria-label="ヒントへの回答" hidden>
+        <span>この言葉は――</span>
+        <button type="button" data-answer="truth">信じる</button>
+        <button type="button" data-answer="lie">嘘だ</button>
+      </div>
+      <div class="card-grid" id="card-grid" aria-label="16枚のカード"></div>
+
+      <details class="how-to">
+        <summary>遊び方</summary>
+        <p>ジョーカーはカードをめくる前に、自動でヒントを出します。「信じる」か「嘘だ」で答えると、カードを1枚だけめくれます。紫に光る吹き出しは、ジョーカーが嘘をついた合図です。見破るとポイントが増えます。最後の2枚は自動で表向きになります。</p>
+      </details>
+
+      <section class="completion" id="completion" aria-labelledby="completion-title" hidden>
+        <video class="celebration-video" id="celebration-video" src="assets/joker_movie.mp4" preload="metadata" playsinline></video>
+        <div class="celebration-effects" id="celebration-effects" aria-hidden="true"></div>
+        <div class="celebration-content">
+          <p class="completion-mark" aria-hidden="true">♛</p>
+          <h2 id="completion-title">祝福の終幕</h2>
+          <p>すべての仮面を見破りました</p>
+          <p class="completion-score">手数 <strong id="final-moves">0</strong></p>
+          <p class="completion-score">見破り <strong id="final-insight">0</strong></p>
+          <button class="restart-button restart-button--large" id="play-again-button" type="button">もう一度遊ぶ</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
